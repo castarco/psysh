@@ -72,6 +72,11 @@ HELP
         $depth  = $input->getOption('depth');
         $target = $this->resolveTarget($input->getArgument('target'));
         $output->page($this->presenter->present($target, $depth, $input->getOption('all') ? Presenter::VERBOSE : 0));
+
+        // TODO: figure out if there are any more values that should set command scope vars
+        if (is_object($target)) {
+            $this->setCommandScopeVars(new \ReflectionObject($target));
+        }
     }
 
     /**

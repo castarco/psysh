@@ -20,7 +20,11 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 class VariableEnumerator extends Enumerator
 {
-    private static $specialVars = array('_', '_e');
+    // n.b. this array is the order in which special variables will be listed
+    private static $specialVars = array(
+        '_', '_e', '__function', '__method', '__class', '__namespace', '__file', '__line', '__dir',
+    );
+
     private $context;
 
     /**
@@ -76,18 +80,23 @@ class VariableEnumerator extends Enumerator
     {
         $scopeVars = $this->context->getAll();
         uksort($scopeVars, function ($a, $b) {
-            if ($a === '_e') {
+            $aIndex = array_search($a, self::$specialVars);
+            $bIndex = array_search($b, self::$specialVars);
+
+            if ($aIndex !== false) {
+                if ($bIndex !== false) {
+                    return $aIndex - $bIndex;
+                }
+
                 return 1;
-            } elseif ($b === '_e') {
-                return -1;
-            } elseif ($a === '_') {
-                return 1;
-            } elseif ($b === '_') {
-                return -1;
-            } else {
-                // TODO: this should be natcasesort
-                return strcasecmp($a, $b);
             }
+
+            if ($bIndex !== false) {
+                return -1;
+            }
+
+            // TODO: this should be natcasesort
+            return strcasecmp($a, $b);
         });
 
         $ret = array();

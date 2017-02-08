@@ -76,6 +76,11 @@ class Loop
                         version_compare(PHP_VERSION, '5.4', '>=') ? 1 : 2
                     );
 
+                    // Let PsySH inject some magic variables back into the
+                    // shell scope... things like $__class, and $__file set by
+                    // reflection commands
+                    extract($__psysh__->getSpecialScopeVariables(false));
+
                     set_error_handler(array($__psysh__, 'handleError'));
                     $_ = eval($__psysh__->flushCode() ?: Loop::NOOP_INPUT);
                     restore_error_handler();
